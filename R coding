@@ -1,0 +1,225 @@
+library (plyr)
+library (stringr)
+
+score.sentiment = function(sentences, pos.words, neg.words, .progress='none')  
+{  
+  require(plyr)  
+  require(stringr)       
+  
+  # we got a vector of sentences. plyr will handle a list  
+  # or a vector as an "l" for us  
+  # we want a simple array ("a") of scores back, so we use   
+  # "l" + "a" + "ply" = "laply":  
+  
+  scores = laply(sentences, function(sentence, pos.words, neg.words) {  
+    
+    # clean up sentences with R's regex-driven global substitute, gsub():  
+    
+    sentence = gsub('[[:punct:]]', '', sentence)  
+    
+    sentence = gsub('[[:cntrl:]]', '', sentence)  
+    
+    sentence = gsub('\\d+', '', sentence)  
+    
+    # and convert to lower case:  
+    
+    sentence = tolower(sentence)  
+    
+    # split into words. str_split is in the stringr package  
+    
+    word.list = str_split(sentence, '\\s+')  
+    
+    # sometimes a list() is one level of hierarchy too much  
+    
+    words = unlist(word.list)  
+    
+    # compare our words to the dictionaries of positive & negative terms  
+    
+    pos.matches = match(words, pos.words)  
+    neg.matches = match(words, neg.words)  
+    
+    # match() returns the position of the matched term or NA  
+    # we just want a TRUE/FALSE:  
+    
+    pos.matches = !is.na(pos.matches)  
+    
+    neg.matches = !is.na(neg.matches)  
+    
+    # and conveniently enough, TRUE/FALSE will be treated as 1/0 by sum():  
+    
+    score = sum(pos.matches) - sum(neg.matches)  
+    
+    return(score)  
+    
+  }, pos.words, neg.words, .progress=.progress )  
+  scores.df = data.frame(score=scores, text=sentences)  
+  return(scores.df)  
+} 
+
+# Scoring Customer feedbacks (complaints) & Adding a column      
+
+#Load sentiment word lists
+hu.liu.pos = scan('C:/Users/molsj/Documents/4th Year/Semester 2/Software Project II/R Codes/positive-words.txt', what='character', comment.char=';')
+hu.liu.neg = scan('C:/Users/molsj/Documents/4th Year/Semester 2/Software Project II/R Codes/negative-words.txt', what='character', comment.char=';')
+
+#Add words to list
+pos.words = c(hu.liu.pos, 'upgrade')
+neg.words = c(hu.liu.neg, 'wtf', 'fuck', 'shit', 'wait','waiting', 'epicfail', 'mechanical')
+
+
+#Import csv file (Dataset)
+DatasetCustomers_Narratives <- read.csv("C:/Users/molsj/Documents/4th Year/Semester 2/Software Project II/R Codes/Consumer_Complaint_Narratives.csv")
+DatasetCustomers_Narratives$Consumer.complaint.narrative<-as.factor(DatasetCustomers_Narratives$Consumer.complaint.narrative)
+
+
+#Score all complaints
+Consumer_Complaint_Narratives.scores = score.sentiment(DatasetCustomers_Narratives$Consumer.complaint.narrative, pos.words,neg.words, .progress='Consumer.complaint.narrative')
+
+
+
+path<-"C:/Users/molsj/Documents/4th Year/Semester 2/Software Project II/R Codes"
+write.csv(Consumer_Complaint_Narratives.scores,file=paste(path,"Consumer_Complaint_Narratives_Scores.csv",sep=""),row.names=TRUE)
+
+
+Consumer_Complaint_Narratives.scores$Feedback = 'Consumer_Complaint_Narratives'
+
+
+# Visualizing         
+library(QPot)
+
+hist(Consumer_Complaint_Narratives.scores$score)
+qplot(Consumer_Complaint_Narratives.scores$score)
+
+#The positive values stand for positive feedback and 
+#the negative values for negative feedback. 
+#The mean tells you about the overall mood of your sample.
+table(Consumer_Complaint_Narratives.scores$score)
+mean(Consumer_Complaint_Narratives.scores$score)
+range(Consumer_Complaint_Narratives.scores$score)
+median(Consumer_Complaint_Narratives.scores$score)
+
+
+
+# Comparing 3 data sets                
+library(ggplot2)
+
+all.scores = rbind(Consumer_Complaint_Narratives.scores)
+ggplot(data=all.scores) + # ggplot works on data.frames, always
+  geom_histogram(mapping=aes(x=score, fill=Feedback), binwidth=0.5) +
+  facet_grid(Feedback~.) + # make a separate plot for each hashtag
+  theme_bw(base_size = 12) + scale_fill_brewer(palette = 18) # plain display, nicer colors
+
+# Classification by polarity                
+library(plyr)
+library(sentimentr)
+library(ggplot2)
+library(RColorBrewer)
+library(wordcloud)
+
+# Get the text
+#Consumer_Complaint_Narratives_txt = sapply(Consumer_Complaint_Narratives.list, function(x) x$getText())
+#DatasetCustomers_Narratives <- read.csv("C:/Users/molsj/Documents/4th Year/Semester 2/Software Project II/R Codes/Consumer_Complaint_Narratives.csv")
+
+#Get the text
+Consumer_Complaint_Narratives_txt = DatasetCustomers_Narratives$Consumer.complaint.narrative
+
+#Data cleaning to prepare the ext for analysis
+
+Consumer_Complaint_Narratives_txt = gsub("[[:punct:]]", "", Consumer_Complaint_Narratives_txt)  
+
+Consumer_Complaint_Narratives_txt = gsub("(RT|via)((?:\\b\\w*@\\w+)+)", "", Consumer_Complaint_Narratives_txt)  
+
+Consumer_Complaint_Narratives_txt = gsub("@\\w+", "", Consumer_Complaint_Narratives_txt) 
+
+Consumer_Complaint_Narratives_txt = gsub("[[:digit:]]", "", Consumer_Complaint_Narratives_txt)  
+
+Consumer_Complaint_Narratives_txt = gsub("^\\s+|\\s+$", "", Consumer_Complaint_Narratives_txt)  
+
+Consumer_Complaint_Narratives_txt = gsub("[ \t]{2,}", "", Consumer_Complaint_Narratives_txt) 
+
+Consumer_Complaint_Narratives_txt = gsub("http\\w+", "", Consumer_Complaint_Narratives_txt) 
+
+Consumer_Complaint_Narratives_txt = gsub("xx", "", Consumer_Complaint_Narratives_txt) 
+
+Consumer_Complaint_Narratives_txt = gsub("xxx", "", Consumer_Complaint_Narratives_txt) 
+
+Consumer_Complaint_Narratives_txt = gsub("xxxx", "", Consumer_Complaint_Narratives_txt) 
+
+try.error = function(x)
+{
+  #create missing value
+  y = NA
+  
+  #trycatch error
+  try_error = tryCatch(tolower(x), error = function(e) e)
+  
+  #if not an error
+  if(!inherits(try_error, "error"))
+    y = tolower(x)
+  
+  #result
+  return(y)
+}
+
+
+#lower case using try.error with sapply
+Consumer_Complaint_Narratives_txt = sapply(Consumer_Complaint_Narratives_txt, try.error)
+
+#Remove NAs in Consumer_Complaint_Narratives_txt
+Consumer_Complaint_Narratives_txt = Consumer_Complaint_Narratives_txt[!is.na(Consumer_Complaint_Narratives_txt)]
+names(Consumer_Complaint_Narratives_txt) = NULL
+
+#intsalling sentiment 0.2
+install.packages("C:/Users/molsj/Documents/4th Year/Semester 2/Software Project II/R Codes/sentiment_0.2.tar.gz", repos = NULL, type="source")
+
+#classify polarity
+#library(sentimentr)
+library(NLP)
+library(tm)
+library(sentiment)
+library(Rstem)
+
+
+class_pol = classify_polarity(Consumer_Complaint_Narratives_txt, algorithm = "bayes")
+
+#example on polarity (sentiment result)
+classify_polarity("i don't know what i am doing, i am confused right now", algorithm = "bayes", verbose = TRUE)
+classify_polarity("I am getting support from my supervisor with this project", algorithm = "bayes", verbose = TRUE)
+
+#get polarity best fit
+polarity = class_pol[,4]
+
+# data frame with results
+sent_categ = data.frame(Consumer.complaint.narrative=Consumer_Complaint_Narratives_txt,
+                        polarity=polarity, stringsAsFactors=FALSE)
+
+library(NLP)
+library(ggplot2)
+
+# plot distribution of polarity
+ggplot(sent_categ, aes(x=polarity)) +
+  geom_bar(aes(y=..count.., fill=polarity)) +
+  scale_fill_brewer(palette="Paired") +
+  labs(x="polarity categories", y="Number of complaints",
+       title = "Sentiment Analysis of customers' complaints (classification by polarity)",
+       plot.title = element_text(size=12))
+
+#Count
+count(sent_categ, "polarity")
+str(count(sent_categ, "polarity"))
+
+
+#Pie Chart with size
+ggplot(data = sent_categ) + 
+geom_bar(mapping = aes(x = polarity, fill = polarity), width = 1) + 
+  scale_fill_brewer(palette="Paired") +
+  theme_linedraw() +
+  coord_polar()
+
+#Pie Chart Same Size
+ggplot(data = sent_categ) + 
+  geom_bar(mapping = aes(x = factor(1), fill = polarity), width = 1) +
+  scale_fill_brewer(palette="Paired") +
+  theme_void() +
+  coord_polar(theta = "y")
+
