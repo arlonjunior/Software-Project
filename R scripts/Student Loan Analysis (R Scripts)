@@ -265,7 +265,6 @@ ggplot(data = sent_categ2) +
   theme_linedraw() +
   coord_polar()
 
-
 #Pie Chart of polarity
 ggplot(data = sent_categ2) + 
   geom_bar(mapping = aes(x = factor(1), fill = polarity), width = 1) +
@@ -320,12 +319,9 @@ colnames(tdm) = emos
 
 library(RColorBrewer)
 
-# comparison word cloud
+# comparison word cloud by emotion
 comparison.cloud(tdm, max.words=1000, colors = brewer.pal(nemo, "Dark2"),
                  scale = c(3,.5), random.order = FALSE, title.size = 1.5)
-
-
-
 
 #Compare words by polarity
 #separating text by polarity
@@ -354,6 +350,7 @@ colnames(tdm) = emos
 
 library(RColorBrewer)
 
-# comparison word cloud
+# comparison word cloud by polarity
 comparison.cloud(tdm, max.words=3000, colors = brewer.pal(nemo, "Dark2"),
                  scale = c(3,.5), random.order = FALSE, title.size = 1.5)
+
