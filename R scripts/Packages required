@@ -1,0 +1,29 @@
+ Packages
+----------
+Packages are collections of R functions, data, and compiled code in a well-defined format. 
+The directory where packages are stored is called the library. 
+
+R comes with a standard set of packages. Others are available for download and installation. 
+Once installed, they have to be loaded into the session to be used.
+
+Packages required for this project are:
+---------------------------------------
+1. plyr - Tools for Splitting, Applying and Combining Data
+2. stringr - Simple, Consistent Wrappers for Common String Operations
+3. ggplot2 - Create Elegant Data Visualisations Using the Grammar of Graphics
+5. sentiment - Analyse Sentiment of English Sentences and assigns score to it
+    This package has been removed from CRAN repository,
+    formerly available version downloaded here:
+                  https://cran.r-project.org/src/contrib/Archive/sentimen
+5. QPot - Quasi-Potential Analysis for Stochastic Differential Equations
+6. RColorBrewer - ColorBrewer Palettes provides color schemes for maps (and other graphics)
+7. wordcloud - Word Clouds provides pretty word clouds
+8. NLP - (Natural Language Processing Infrastructure) Basic classes and methods for Natural Language Processing
+9. tm - (Text Mining Package) A framework for text mining applications within R
+10. Rstem - Provides R language bindings to the word stemming facilities provided by Martin Porter's Snowball.
+            The package provides a simple way to compute the stems of each word in a character vector via the the function wordStem(). 
+            This is important in text analysis such as documents and email.
+    This package has been removed from CRAN repository,
+    formerly available version downloaded here:
+                  http://cran.wustl.edu/src/contrib/Archive/Rstem/  or
+                  http://www.omegahat.net/
