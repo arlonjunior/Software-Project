@@ -1,5 +1,5 @@
 				Opinion Lexicon 
-
+			       -----------------
 A list of English positive and negative opinion words or sentiment words around 6800 words in total 
 (2006 positve words and 4783 negative words).
 This list was compiled over many years starting from Hu and Liu first paper. (Hu and Liu, KDD-2004).
