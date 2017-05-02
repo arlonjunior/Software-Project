@@ -106,14 +106,14 @@ median(Consumer_Complaint_Narratives.scores$score)
 #Frequency of each score
 count(Consumer_Complaint_Narratives.scores$score)
 
-#Comparing data sets                
+#Histogram with ggplot2               
 all.scores = rbind(Consumer_Complaint_Narratives.scores)
 ggplot(data=all.scores) + # ggplot works on data.frames, always
   geom_histogram(mapping=aes(x=score, fill=Feedback), binwidth=0.5) +
   facet_grid(Feedback~.) + # make a separate plot for each hashtag
   theme_bw(base_size = 12) + scale_fill_brewer(palette = 18) # plain display, nicer colors
 
-# Classification by polarity
+# Classification
 
 #Get the text
 Consumer_Complaint_Narratives_txt = DatasetCustomers_Narratives$Consumer.complaint.narrative
@@ -283,6 +283,7 @@ random.order=FALSE, rot.per=0.35,colors=brewer.pal(8,"Dark2"))
 
 #Comparing word cloud 
 
+#Compare words by emotion
 #separating text by emotion
 emos = levels(factor(sent_categ$emotion))
 nemo = length(emos)
@@ -310,11 +311,11 @@ colnames(tdm) = emos
 library(RColorBrewer)
 
 # comparison word cloud by emotion
-comparison.cloud(tdm, colors = brewer.pal(nemo, "Dark2"),
+comparison.cloud(tdm, max.words=1000,colors = brewer.pal(nemo, "Dark2"),
                  scale = c(3,.5), random.order = FALSE, title.size = 1.5)
 
-
-# separating text by polarity
+#Compare words by polarity
+#separating text by polarity
 emos = levels(factor(sent_categ$polarity))
 nemo = length(emos)
 emo.docs = rep("", nemo)
@@ -343,3 +344,4 @@ library(RColorBrewer)
 # comparison word cloud by polarity
 comparison.cloud(tdm, max.words=3000, colors = brewer.pal(nemo, "Dark2"),
                  scale = c(3,.5), random.order = FALSE, title.size = 1.5)
+
