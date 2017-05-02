@@ -85,17 +85,7 @@ write.csv(Student_Complaint_Narratives.scores,file=paste(path,"Student_Complaint
 
 Student_Complaint_Narratives.scores$Feedback = 'Student_Complaint_Narratives'
 
-
-#str(count(sent_categ2, "polarity"))
-str(Student_Complaint_Narratives.scores$Feedback)
-table(Student_Complaint_Narratives.scores$Feedback)
-
-str(table(Student_Complaint_Narratives.scores$Feedback))
-str(count(Student_Complaint_Narratives.scores, "Feedback"))
-str(count(sent_categ2, "polarity"))
-
-
-# Visualizing  
+#Visualizing  
 library(ggplot2)
 library(QPot)
 
@@ -353,4 +343,3 @@ library(RColorBrewer)
 # comparison word cloud by polarity
 comparison.cloud(tdm, max.words=3000, colors = brewer.pal(nemo, "Dark2"),
                  scale = c(3,.5), random.order = FALSE, title.size = 1.5)
-
